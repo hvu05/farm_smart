@@ -1,0 +1,43 @@
+# dependencies
+node_modules/
+
+# build
+/dist/
+/build/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# env
+.env
+.env.*
+!.env.example
+
+# prisma
+prisma/.env
+
+# cache
+.cache/
+.eslintcache
+.tsbuildinfo
+
+# coverage
+coverage/
+.nyc_output/
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# OS
+.DS_Store
+Thumbs.db
