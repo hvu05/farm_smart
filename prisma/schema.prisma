@@ -16,3 +16,111 @@ model Example {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
+
+model User {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique @db.VarChar(50)
+  email       String   @unique @db.VarChar(100)
+  hashedPassword   String  @db.VarChar(255)
+  phone       String?  @db.VarChar(15)
+  createdAt   DateTime @default(now()) @db.Timestamp(6)
+
+  devices      Device[]
+  pump_controls PumpControl[]
+  notifications Notification[]
+
+  @@map("users")
+}
+
+enum DeviceType {
+  sensor
+  actuator
+}
+
+model Device {
+  id   Int        @id @default(autoincrement())
+  userId     Int
+  deviceName String     @db.VarChar(100)
+  deviceType DeviceType
+  location    String?    @db.VarChar(100)
+  createdAt  DateTime   @default(now()) @db.Timestamp(6)
+
+  user        User      @relation(fields: [userId], references: [id])
+  sensorData SensorData[]
+  pumpControls PumpControl[]
+  alerts      Alert[]
+
+  @@index([userId])
+  @@map("devices")
+}
+
+model SensorData {
+  id        Int      @id @default(autoincrement())
+  deviceId      Int
+  temperature    Float
+  soilMoisture  Float
+  recordedAt    DateTime @db.Timestamp(6)
+
+  device         Device   @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId, recordedAt])
+  @@map("sensor_data")
+}
+
+enum PumpAction {
+  ON
+  OFF
+}
+
+model PumpControl {
+  id   Int        @id @default(autoincrement())
+  deviceId Int
+  userId   Int?
+  action    PumpAction
+  reason    String?    @db.Text
+  timestamp DateTime   @default(now()) @db.Timestamp(6)
+
+  device    Device     @relation(fields: [deviceId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id])
+
+  @@index([deviceId, timestamp])
+  @@map("pump_control")
+}
+
+enum AlertType {
+  HIGH_TEMP
+  LOW_HUMIDITY
+  ERROR
+}
+
+model Alert {
+  id    Int       @id @default(autoincrement())
+  sensorId   Int
+  alertType  AlertType
+  message     String    @db.Text
+  triggeredAt DateTime @default(now()) @db.Timestamp(6)
+
+  device      Device    @relation(fields: [sensorId], references: [id])
+
+  @@index([sensorId, triggeredAt])
+  @@map("alerts")
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+}
+
+model Notification {
+  id Int                 @id @default(autoincrement())
+  userId         Int
+  message         String              @db.Text
+  status          NotificationStatus  @default(UNREAD)
+  sentAt         DateTime            @default(now()) @db.Timestamp(6)
+
+  user            User                @relation(fields: [userId], references: [id])
+
+  @@index([userId, status])
+  @@index([sentAt])
+  @@map("notifications")
+}
