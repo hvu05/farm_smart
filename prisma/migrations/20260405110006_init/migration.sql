@@ -11,6 +11,31 @@ CREATE TYPE "AlertType" AS ENUM ('HIGH_TEMP', 'LOW_HUMIDITY', 'ERROR');
 CREATE TYPE "NotificationStatus" AS ENUM ('UNREAD', 'READ');
 
 -- CreateTable
+CREATE TABLE "Example" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "value" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Example_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "users" (
+    "id" SERIAL NOT NULL,
+    "username" VARCHAR(50) NOT NULL,
+    "email" VARCHAR(100) NOT NULL,
+    "hashedPassword" VARCHAR(255) NOT NULL,
+    "phone" VARCHAR(15),
+    "createdAt" TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "devices" (
     "id" SERIAL NOT NULL,
     "userId" INTEGER NOT NULL,
@@ -66,6 +91,12 @@ CREATE TABLE "notifications" (
 
     CONSTRAINT "notifications_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
 CREATE INDEX "devices_userId_idx" ON "devices"("userId");
