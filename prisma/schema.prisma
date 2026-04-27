@@ -26,15 +26,18 @@ model User {
   createdAt   DateTime @default(now()) @db.Timestamp(6)
 
   devices      Device[]
-  pump_controls PumpControl[]
   notifications Notification[]
 
   @@map("users")
 }
 
 enum DeviceType {
-  sensor
-  actuator
+  TEMPERATURE_SENSOR
+  SOIL_SENSOR
+  LIGHT_SENSOR
+  PUMP
+  LED
+  LCD
 }
 
 model Device {
@@ -48,42 +51,76 @@ model Device {
   user        User      @relation(fields: [userId], references: [id])
   sensorData SensorData[]
   pumpControls PumpControl[]
-  alerts      Alert[]
+  rgbControls RGBControl[]
+  displayLogs    DisplayLog[]
 
   @@index([userId])
+  @@index([deviceType])
+  @@index([location])
   @@map("devices")
+}
+
+enum DataType {
+  temperature
+  humidity
+  soil
+  light
 }
 
 model SensorData {
   id        Int      @id @default(autoincrement())
   deviceId      Int
-  temperature    Float
-  soilMoisture  Float
+  dataType      DataType
+  value      Float
   recordedAt    DateTime @db.Timestamp(6)
 
   device         Device   @relation(fields: [deviceId], references: [id])
 
-  @@index([deviceId, recordedAt])
+  alerts         Alert[] 
+
+  @@index([dataType])
+  @@index([recordedAt])
+  @@index([deviceId, dataType, recordedAt])
   @@map("sensor_data")
 }
 
-enum PumpAction {
-  ON
-  OFF
+model DisplayLog {
+  id        Int @id @default(autoincrement())
+  deviceId Int
+  content   String @db.VarChar(32)
+  createdAt DateTime @default(now()) @db.Timestamp(6)
+
+  device    Device     @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId])
+  @@map("display_log")
+}
+
+model RGBControl {
+  id        Int @id @default(autoincrement())
+  deviceId Int
+  isOn    Boolean  @default(false)
+  value     String // JSON (RGB, etc)
+  updatedAt DateTime @default(now()) @db.Timestamp(6)
+
+  device    Device     @relation(fields: [deviceId], references: [id])
+
+  @@index([deviceId, updatedAt])
+  @@index([isOn])
+  @@map("rgb_control")
 }
 
 model PumpControl {
   id   Int        @id @default(autoincrement())
   deviceId Int
-  userId   Int?
-  action    PumpAction
+  isOn    Boolean  @default(false)
   reason    String?    @db.Text
-  timestamp DateTime   @default(now()) @db.Timestamp(6)
+  updatedAt DateTime   @default(now()) @db.Timestamp(6)
 
   device    Device     @relation(fields: [deviceId], references: [id])
-  user      User?      @relation(fields: [userId], references: [id])
 
-  @@index([deviceId, timestamp])
+  @@index([deviceId, updatedAt])
+  @@index([isOn])
   @@map("pump_control")
 }
 
@@ -95,32 +132,27 @@ enum AlertType {
 
 model Alert {
   id    Int       @id @default(autoincrement())
-  sensorId   Int
   alertType  AlertType
   message     String    @db.Text
   triggeredAt DateTime @default(now()) @db.Timestamp(6)
 
-  device      Device    @relation(fields: [sensorId], references: [id])
-
-  @@index([sensorId, triggeredAt])
+  sensorDataId Int?     
+  sensorData   SensorData? @relation(fields: [sensorDataId], references: [id]) 
+  
+  @@index([sensorDataId, triggeredAt])
   @@map("alerts")
-}
-
-enum NotificationStatus {
-  UNREAD
-  READ
 }
 
 model Notification {
   id Int                 @id @default(autoincrement())
   userId         Int
-  message         String              @db.Text
-  status          NotificationStatus  @default(UNREAD)
+  message        String              @db.Text
+  isRead         Boolean  @default(false)
   sentAt         DateTime            @default(now()) @db.Timestamp(6)
 
   user            User                @relation(fields: [userId], references: [id])
 
-  @@index([userId, status])
+  @@index([userId, isRead])
   @@index([sentAt])
   @@map("notifications")
 }
