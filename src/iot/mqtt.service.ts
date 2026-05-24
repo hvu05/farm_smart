@@ -12,7 +12,12 @@ const buildOptions = (): IClientOptions => ({
     reconnectPeriod: 5_000,
 });
 
-const sensorTopics = ['dadn.humidity', 'dadn.temperature', 'dadn.soil-moisture', 'dadn.light'].map((feed) => `${env.MQTT_USERNAME}/feeds/${feed}`);
+const sensorTopics = [
+    'dadn.humidity',
+    'dadn.temperature',
+    'dadn.soil-moisture',
+    'dadn.light'
+].map((feed) => `${env.MQTT_USERNAME}/feeds/${feed}`);
 
 export const initMqtt = (): MqttClient => {
     if (client) return client;

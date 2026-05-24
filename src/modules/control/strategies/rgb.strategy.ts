@@ -21,7 +21,7 @@ export interface RGBPayload {
 
 export class RGBStrategy implements IDeviceControlStrategy {
     readonly deviceType = DeviceType.LED;
-    readonly mqttFeed = 'led';
+    readonly mqttFeed = 'dadn.led';
 
     async execute(deviceId: string, payload: unknown): Promise<ControlResult> {
         const { isOn, color } = payload as RGBPayload;

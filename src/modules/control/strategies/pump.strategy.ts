@@ -15,7 +15,7 @@ export interface PumpPayload {
 
 export class PumpStrategy implements IDeviceControlStrategy {
     readonly deviceType = DeviceType.PUMP;
-    readonly mqttFeed = 'pumper';
+    readonly mqttFeed = 'dadn.pumper';
 
     async execute(deviceId: string, payload: unknown): Promise<ControlResult> {
         const { isOn, reason } = payload as PumpPayload;
